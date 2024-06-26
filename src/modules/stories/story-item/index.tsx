@@ -4,14 +4,16 @@ import { TItem } from "@/types/hacker-news";
 import { ArrowFatLineUp, Coin, Link, UserCircle } from "@phosphor-icons/react";
 import { HACKER_NEWS_URL } from "@/utils/constants";
 import { formatDate } from "@/lib/formatDate";
+import Skeleton from "react-loading-skeleton";
 
 type Props = {
-  story: TItem;
+  story?: TItem;
+  isLoading?: boolean;
 };
 
-const StoryItem = ({ story }: Props) => {
+const StoryItem = ({ story, isLoading }: Props) => {
   const handleClick = () => {
-    window.open(story.url, "_blank");
+    if (story) window.open(story?.url, "_blank");
   };
 
   return (
@@ -24,44 +26,66 @@ const StoryItem = ({ story }: Props) => {
         <div className={cn(styles.userDetails)}>
           <UserCircle size="42px" />
           <div className={cn(styles.author)}>
-            <a
-              href={`${HACKER_NEWS_URL}/user?id=${story.by}`}
-              target="_blank"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {story?.by}
-            </a>
-            {story.user?.karma && (
-              <>
-                <span>• </span>
-                <span data-testid="user-karma" className={cn(styles.karma)}>
-                  {story.user.karma}
-                  <Coin size={20} />
-                </span>
-              </>
+            {isLoading ? (
+              <Skeleton height={20} width={100} />
+            ) : (
+              <a
+                href={`${HACKER_NEWS_URL}/user?id=${story?.by}`}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {story?.by}
+              </a>
+            )}
+            {isLoading ? (
+              <Skeleton height={20} width={20} />
+            ) : (
+              story?.user?.karma && (
+                <>
+                  <span>• </span>
+                  <span data-testid="user-karma" className={cn(styles.karma)}>
+                    {story.user.karma}
+                    <Coin size={20} />
+                  </span>
+                </>
+              )
             )}
           </div>
         </div>
-        <p className={cn(styles.title)} onClick={handleClick}>
-          {story?.title}
-        </p>
-        {story.time && (
-          <div className={cn(styles.storyDetails)}>
-            {formatDate(new Date(story.time * 1000), "MMM dd, yyyy")}
-          </div>
+        {isLoading ? (
+          <Skeleton height={10} width={400} count={3} />
+        ) : (
+          <p className={cn(styles.title)} onClick={handleClick}>
+            {story?.title}
+          </p>
+        )}
+        {isLoading ? (
+          <Skeleton height={10} width={100} />
+        ) : (
+          story?.time && (
+            <div className={cn(styles.storyDetails)}>
+              {formatDate(new Date(story.time * 1000), "MMM dd, yyyy")}
+            </div>
+          )
         )}
         <div className={cn(styles.footerContainer)}>
-          <img
-            className={cn(styles.image)}
-            src="/images/work.webp"
-            onClick={handleClick}
-          />
+          {isLoading ? (
+            <Skeleton height={150} width={400} style={{ borderRadius: 16 }} />
+          ) : (
+            <img
+              className={cn(styles.image)}
+              src="/images/work.webp"
+              onClick={handleClick}
+            />
+          )}
           <div className={cn(styles.footer)}>
             <div className={cn(styles.storyScore)}>
               <ArrowFatLineUp />
-              <span>{story.score}</span>
+              <span>
+                {isLoading ? <Skeleton height={15} width={40} /> : story?.score}
+              </span>
             </div>
-            <a href={story.url} target="_blank">
+            <a href={story?.url} target="_blank">
               <Link />
             </a>
           </div>
